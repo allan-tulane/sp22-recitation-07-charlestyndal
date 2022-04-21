@@ -1,5 +1,6 @@
 import math, queue
 from collections import Counter
+import tabulate
 
 class TreeNode(object):
     # we assume data is a tuple (frequency, character)
@@ -34,7 +35,12 @@ def make_huffman_tree(f):
     # create a new node z with x and y as children,
     # insert z into the priority queue (using an empty character "")
     while (p.qsize() > 1):
-        # TODO
+        x = p.get()
+        x.code = 0
+        y = p.get()
+        y.code = 1
+        z = TreeNode(x, y,(x.data[0]+y.data[0], ""))
+        p.put(z)
         
     # return root of the tree
     return p.get()
@@ -42,20 +48,54 @@ def make_huffman_tree(f):
 # perform a traversal on the prefix code tree to collect all encodings
 def get_code(node, prefix="", code={}):
     # TODO - perform a tree traversal and collect encodings for leaves in code
-    pass
+  prefix = prefix + str(node.code)
+
+  if node.left:
+    get_code(node.left, prefix)
+  if node.right:
+    get_code(node.right, prefix)
+  if(not node.left and not node.right):
+    code[node.date[1]] = prefix
+  return code
 
 # given an alphabet and frequencies, compute the cost of a fixed length encoding
 def fixed_length_cost(f):
-    # TODO
-    pass
+  # TODO
+  n = len(f.keys())
+  cost_per_char = math.ceil(math.log2(n))
+  cost = 0
+  for i in f.values():
+    cost += cost_per_char*int(i)
+  return cost
 
 # given a Huffman encoding and character frequencies, compute cost of a Huffman encoding
 def huffman_cost(C, f):
-    # TODO
-    pass
+  cost = 0
+  for letter, frequency in f.items():
+    binary = C[letter]
+    length = len(binary)
+    cost_per_letter = length*frequency
+    cost+=cost_per_letter
+  return cost
 
-f = get_frequencies('f1.txt')
-print("Fixed-length cost:  %d" % fixed_length_cost(f))
-T = make_huffman_tree(f)
-C = get_code(T)
-print("Huffman cost:  %d" % huffman_cost(C, f))
+
+def print_results(results):
+    """ change as needed for comparisons """
+    print(tabulate.tabulate(results,
+                            headers=['File', 'Fixed-Length Coding', 'Huffman Coding', 'Huffman vs. Fixed-Length'],
+                            floatfmt=".9f",
+                            tablefmt="github"))
+
+
+if __name__ == "__main__":
+    files = ["alice29.txt", "asyoulik.txt", "f1.txt", "grammar.lsp", "fields.c"]
+    results = []
+    for i in range(0,5):
+        f = get_frequencies(files[i])
+        fixed_cost = fixed_length_cost(f)
+        T = make_huffman_tree(f)
+        C = get_code(T)
+        huff_cost = huffman_cost(C, f)
+        ratio = huff_cost/fixed_cost
+        results.append((files[i], fixed_cost, huff_cost, ratio))
+    print_results(results)
