@@ -2,7 +2,7 @@
 ## Answers
 
 **Name:**Charles Tyndal
-**Name:**Jamie Hartman
+
 
 
 Place all written answers from `recitation-07.md` here for easier grading.
